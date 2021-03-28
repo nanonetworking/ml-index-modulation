@@ -20,31 +20,28 @@ def get_args():
     parser.add_argument("--downsample_rate", type=float, default=0.1, help="Downsample rate")
     parser.add_argument('--window_numbers', nargs='+', default=[5, 6, 7],  type=int, help='Different number of windows that will be used in training')
     parser.add_argument("--dataset_size", type=int, default=100, help="Size of the dataset that will be created for each window number")
+    parser.add_argument("--val_ratio", type=float, default=0.2, help="Validation set ratio")
     opt = parser.parse_args()
 
     return opt
 
 opt = get_args()
 
-PI = np.pi
-pi = np.pi
+
 time = opt.simulation_time
 downsample = opt.downsample_rate
 x_range = int(time / downsample)
-az_pair, el_pair = 4, 4
-test_size = 0.2
 folder_path = opt.training_path
-test_path = "new_data\\test_data\\"
 size = time / downsample
 mol_num = opt.training_mol_num
-onlyfiles = [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
 
 
 
 
-def model_train(data, classes, numberr):
+
+def model_train(data, classes, numberr, opt):
     keras.backend.clear_session()
-    X_train, X_test, y_train, y_test = train_test_split(data, classes, test_size=test_size)
+    X_train, X_test, y_train, y_test = train_test_split(data, classes, test_size=opt.val_ratio)
     inputs = Input(shape=(X_train.shape[1],X_train.shape[2],1))
 #    x = Conv2D(1024, kernel_size=(8,5),strides=(1,5), activation="relu")(inputs)
     x = Conv2D(512, kernel_size = 2)(inputs)
@@ -104,7 +101,7 @@ for numberr in opt.window_numbers:
     data_reshaped[:,:,:,:] = data_dict["x"]
     classes[:, :] = data_dict["y"]
 
-    hist, model = model_train(data_reshaped, classes, numberr)
+    hist, model = model_train(data_reshaped, classes, numberr, opt)
     model.save(data_folder + "multi_output_model.h5")
     
     
