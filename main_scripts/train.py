@@ -7,7 +7,6 @@ from keras.layers import Dense, Conv2D, Flatten, BatchNormalization
 from tensorflow import keras
 from os import listdir
 from os.path import isfile, join
-import random
 import os 
 import argparse
 from dataloader import DataLoader
@@ -43,10 +42,9 @@ onlyfiles = [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
 
 
 
-def model_train(data, classes):
+def model_train(data, classes, numberr):
     keras.backend.clear_session()
     X_train, X_test, y_train, y_test = train_test_split(data, classes, test_size=test_size)
-    
     inputs = Input(shape=(X_train.shape[1],X_train.shape[2],1))
 #    x = Conv2D(1024, kernel_size=(8,5),strides=(1,5), activation="relu")(inputs)
     x = Conv2D(512, kernel_size = 2)(inputs)
@@ -67,7 +65,7 @@ def model_train(data, classes):
         classes_dict_train["y_train_" + str(i)] = to_categorical(y_train[:,i-1] - 1)
         classes_dict_test["y_test_" + str(i)] = to_categorical(y_test[:,i-1] - 1)
         output_layer["output_" + str(i)] = Dense(8, activation="softmax")(x)
-        loss_dic["dense_" + str(i+2)] = 'categorical_crossentropy'
+        loss_dic["dense_" + str(i+1)] = 'categorical_crossentropy'
     model = Model(inputs=inputs, outputs=list(output_layer.values()))
     lr_schedule = keras.optimizers.schedules.ExponentialDecay(
     initial_learning_rate=1e-3,
@@ -91,7 +89,7 @@ dataloader.training_data_creater(data)
 
 
 for numberr in opt.window_numbers:
-    window_size = opt.time / numberr 
+    window_size = time / numberr 
     upper_limit = max(4,numberr)      
     data_folder = "window_" + str(window_size) + "_upper_" + str(upper_limit) + "\\"
     if not os.path.exists(data_folder):
@@ -103,7 +101,10 @@ for numberr in opt.window_numbers:
     data_reshaped = np.zeros((data_dict["x"].shape[0], 8, x_range, 1))
     classes = np.zeros((data_dict["x"].shape[0], numberr))
 
-    hist, model = model_train(data_reshaped, classes)
+    data_reshaped[:,:,:,:] = data_dict["x"]
+    classes[:, :] = data_dict["y"]
+
+    hist, model = model_train(data_reshaped, classes, numberr)
     model.save(data_folder + "multi_output_model.h5")
     
     
