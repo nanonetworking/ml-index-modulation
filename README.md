@@ -14,4 +14,4 @@ https://arxiv.org/abs/2103.09812
 ```
 
 # Acknowledgements
-This work was supported in part by the Scientific and Technical ResearchCouncil of Turkey (TUBITAK) under Grant 119E190.
+This work was supported in part by the Scientific and Technical Research Council of Turkey (TUBITAK) under Grant 119E190.
